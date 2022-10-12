@@ -33,7 +33,7 @@ def getData(addr):
         data = {}
         page_count = soup.find_all('a', {'class': 'page-link'})
         if page_count:
-            print("Page count: ", page_count[-2].text)
+            print(f"Page count ({addr}): ", page_count[-2].text)
         for tr in soup.find('table', {"id": 'summary-table'}).find_all('tr'):
             data[tr.find('th').text] = tr.find('td').text
         data['Address'] = addr
