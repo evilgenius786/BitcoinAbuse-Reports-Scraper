@@ -5,3 +5,4 @@ selenium
 translate
 webdriver-manager
 mss
+lxml

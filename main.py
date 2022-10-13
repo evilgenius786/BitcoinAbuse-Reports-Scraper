@@ -77,6 +77,8 @@ def processPages():
         for addr in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
             threads.append(Thread(target=getData, args=(addr.find('a').text,)))
             threads[-1].start()
+        print("Breaking on first page!!")
+        break
         next_page = soup.find('a', {'rel': 'next'})
         if next_page:
             next_page = next_page['href']
