@@ -1,10 +1,11 @@
 import json
 import os
 import time
-from threading import Semaphore, Thread
+from threading import Semaphore, Thread, Lock
 
 import requests
 from bs4 import BeautifulSoup
+from mss import mss
 from selenium.webdriver.firefox.service import Service
 from translate import Translator
 from selenium import webdriver
@@ -12,6 +13,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 thread_count = 10
 semaphore = Semaphore(thread_count)
+lock = Lock()
 
 
 def getData(addr):
@@ -22,14 +24,15 @@ def getData(addr):
     with semaphore:
         url = f"https://www.bitcoinabuse.com/reports/{addr}"
         print(url)
-        driver.get(url)
-        try:
-            driver.maximize_window()
-        except:
-            pass
-        time.sleep(1)
-        driver.save_full_page_screenshot(f'./screenshots/{addr}.png')
-        soup = BeautifulSoup(driver.page_source, 'lxml')
+        with lock:
+            driver.get(url)
+            try:
+                driver.maximize_window()
+            except:
+                pass
+            time.sleep(1)
+            takeScreenshot(f'./screenshots/{addr}.png')
+            soup = BeautifulSoup(driver.page_source, 'lxml')
         data = {}
         page_count = soup.find_all('a', {'class': 'page-link'})
         if page_count:
@@ -58,6 +61,13 @@ def getData(addr):
         return data
 
 
+def takeScreenshot(file_name, gecko_driver=None):
+    if gecko_driver:
+        gecko_driver.save_full_page_screenshot(file_name)
+    else:
+        mss().shot(mon=-1, output=file_name)
+
+
 def processPages():
     next_page = 'https://www.bitcoinabuse.com/reports'
     threads = []
@@ -77,7 +87,6 @@ def processPages():
 
 
 def main():
-    initialize()
     # getData('17g8bzF6fvGzWf2sWqbSx3vt66fbj7NTFm')
     processPages()
 
@@ -118,5 +127,7 @@ ________________________________________________________________________________
 
 
 if __name__ == '__main__':
+    initialize()
+    print("Launching Firefox browser...")
     driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
     main()
