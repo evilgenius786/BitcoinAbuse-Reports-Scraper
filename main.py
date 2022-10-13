@@ -26,6 +26,10 @@ def getData(addr):
         print(url)
         with lock:
             driver.get(url)
+            while "server error" in driver.page_source.lower():
+                print("Server error, retrying")
+                driver.get(url)
+                time.sleep(1)
             try:
                 driver.maximize_window()
             except:
@@ -101,7 +105,12 @@ def initialize():
 
 
 def getSoup(url):
-    return BeautifulSoup(requests.get(url).content, 'lxml')
+    soup = BeautifulSoup(requests.get(url).content, 'lxml')
+    while "server error" in soup.text.lower():
+        print("Server error, retrying")
+        soup = BeautifulSoup(requests.get(url).content, 'lxml')
+        time.sleep(1)
+    return soup
 
 
 def translate():
