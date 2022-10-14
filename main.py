@@ -73,15 +73,22 @@ def takeScreenshot(file_name, gecko_driver=None):
 
 
 def processPages():
+    report = {}
     next_page = 'https://www.bitcoinabuse.com/reports'
     threads = []
     while next_page:
         print(next_page)
         soup = getSoup(next_page)
-        for addr in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
-            threads.append(Thread(target=getData, args=(addr.find('a').text,)))
+        for div in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
+            addr = div.find('a').text
+            threads.append(Thread(target=getData, args=(addr,)))
             threads[-1].start()
+            if addr not in report:
+                report[addr] = 0
+            report[addr] += 1
         print("Breaking on first page!!")
+        with open('report.json', 'w') as f:
+            json.dump(report, f, indent=4)
         break
         next_page = soup.find('a', {'rel': 'next'})
         if next_page:
