@@ -65,11 +65,10 @@ def getData(addr):
         return data
 
 
-def takeScreenshot(file_name, gecko_driver=None):
-    if gecko_driver:
-        gecko_driver.save_full_page_screenshot(file_name)
-    else:
-        mss().shot(mon=-1, output=file_name)
+def takeScreenshot(file_name):
+    driver.execute_script("window.scrollBy(0,370)", "")
+    # driver.save_full_page_screenshot(file_name)
+    mss().shot(mon=-1, output=file_name)
 
 
 def processPages():
