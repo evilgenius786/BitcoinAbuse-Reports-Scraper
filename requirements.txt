@@ -2,7 +2,7 @@ requests
 bs4
 beautifulsoup4
 selenium
-translate
 webdriver-manager
+googletrans
 mss
 lxml

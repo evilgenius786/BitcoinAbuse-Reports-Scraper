@@ -6,14 +6,16 @@ from threading import Semaphore, Thread, Lock
 import requests
 from bs4 import BeautifulSoup
 from mss import mss
+from googletrans import Translator
 from selenium.webdriver.firefox.service import Service
-from translate import Translator
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
 
 thread_count = 10
 semaphore = Semaphore(thread_count)
 lock = Lock()
+
+translator = Translator()
 
 
 def getData(addr):
@@ -51,7 +53,7 @@ def getData(addr):
         while next_page:
             for tr in reports.find_all('tr'):
                 tds = tr.find_all('td')
-                report = {ths[i].text: tds[i].text for i in range(len(tds))}
+                report = {ths[i].text: translator.translate(tds[i].text) for i in range(len(tds))}
                 if report != {}:
                     data['reports'].append(report)
             next_page = soup.find('a', {'rel': 'next'})
@@ -85,13 +87,13 @@ def processPages():
             if addr not in report:
                 report[addr] = 0
             report[addr] += 1
-        print("Breaking on first page!!")
-        with open('report.json', 'w') as f:
-            json.dump(report, f, indent=4)
-        break
+        # print("Breaking on first page!!")
+        # break
         next_page = soup.find('a', {'rel': 'next'})
         if next_page:
             next_page = next_page['href']
+    with open('report.json', 'w') as f:
+        json.dump(report, f, indent=4)
     print("All pages done!! Now Waiting for threads to finish!!")
     for t in threads:
         t.join()
@@ -117,12 +119,6 @@ def getSoup(url):
         soup = BeautifulSoup(requests.get(url).content, 'lxml')
         time.sleep(1)
     return soup
-
-
-def translate():
-    translator = Translator(to_lang="German")
-    translation = translator.translate("Good Morning!")
-    print(translation)
 
 
 def logo():
