@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import traceback
 from threading import Semaphore, Thread, Lock
 
 import requests
@@ -140,7 +141,11 @@ ________________________________________________________________________________
 
 
 if __name__ == '__main__':
-    initialize()
-    print("Launching Firefox browser...")
-    driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
-    main()
+    try:
+        initialize()
+        print("Launching Firefox browser...")
+        driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+        main()
+    except:
+        traceback.print_exc()
+        input("Error occurred in execution, waiting for user input...")
