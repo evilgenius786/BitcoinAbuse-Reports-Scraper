@@ -7,7 +7,7 @@ from threading import Semaphore, Thread, Lock
 import requests
 from bs4 import BeautifulSoup
 from mss import mss
-from googletrans import Translator
+# from googletrans import Translator
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from selenium.webdriver.firefox.service import Service
@@ -18,12 +18,12 @@ thread_count = 10
 semaphore = Semaphore(thread_count)
 lock = Lock()
 
-translator = Translator()
+# translator = Translator()
 
 
 def uploadToGoogleDrive():
     gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
+    gauth.CommandLineAuth()
     drive = GoogleDrive(gauth)
     path = f"{os.getcwd()}/screenshots"
     f = None
