@@ -8,6 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from mss import mss
 from googletrans import Translator
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
@@ -17,6 +19,30 @@ semaphore = Semaphore(thread_count)
 lock = Lock()
 
 translator = Translator()
+
+
+def uploadToGoogleDrive():
+    gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
+    drive = GoogleDrive(gauth)
+    path = f"{os.getcwd()}/screenshots"
+    f = None
+    for x in os.listdir(path):
+        try:
+            print("Uploading", x)
+            f = drive.CreateFile({'title': x})
+            f.SetContentFile(os.path.join(path, x))
+            f.Upload()
+            # Due to a known bug in pydrive if we don't empty the variable used to  upload the files to Google Drive the
+            # file stays open in memory and causes a memory leak, therefore preventing its deletion
+            f = None
+            if f:
+                pass
+            print(f"Uploaded {x}")
+            os.remove(os.path.join(path, x))
+        except:
+            traceback.print_exc()
+            print(f"Unable to upload {x}")
 
 
 def getData(addr):
