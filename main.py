@@ -79,20 +79,23 @@ def processPages():
     next_page = 'https://www.bitcoinabuse.com/reports'
     threads = []
     while next_page:
-        print(next_page)
-        soup = getSoup(next_page)
-        for div in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
-            addr = div.find('a').text
-            threads.append(Thread(target=getData, args=(addr,)))
-            threads[-1].start()
-            if addr not in report:
-                report[addr] = 0
-            report[addr] += 1
-        # print("Breaking on first page!!")
-        # break
-        next_page = soup.find('a', {'rel': 'next'})
-        if next_page:
-            next_page = next_page['href']
+        try:
+            print(next_page)
+            soup = getSoup(next_page)
+            for div in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
+                addr = div.find('a').text
+                threads.append(Thread(target=getData, args=(addr,)))
+                threads[-1].start()
+                if addr not in report:
+                    report[addr] = 0
+                report[addr] += 1
+            # print("Breaking on first page!!")
+            # break
+            next_page = soup.find('a', {'rel': 'next'})
+            if next_page:
+                next_page = next_page['href']
+        except:
+            traceback.print_exc()
     with open('report.json', 'w') as f:
         json.dump(report, f, indent=4)
     print("All pages done!! Now Waiting for threads to finish!!")
