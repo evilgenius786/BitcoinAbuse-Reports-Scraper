@@ -45,6 +45,9 @@ def uploadToGoogleDrive():
             print(f"Unable to upload {x}")
 
 
+uploadToGoogleDrive()
+
+
 def getData(addr):
     file = f'./reports/{addr}.json'
     if os.path.exists(file):
