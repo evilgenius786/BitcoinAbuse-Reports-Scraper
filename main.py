@@ -54,7 +54,14 @@ def getData(addr):
         while next_page:
             for tr in reports.find_all('tr'):
                 tds = tr.find_all('td')
-                report = {ths[i].text: translator.translate(tds[i].text) for i in range(len(tds))}
+                try:
+                    # report = {ths[i].text: translator.translate(tds[i].text).text for i in range(len(tds))}
+                    # json.dumps(report, indent=4)
+                    report = {ths[i].text: tds[i].text for i in range(len(tds))}
+                except:
+                    print("Unable to translate")
+                    traceback.print_exc()
+                    report = {ths[i].text: tds[i].text for i in range(len(tds))}
                 if report != {}:
                     data['reports'].append(report)
             next_page = soup.find('a', {'rel': 'next'})
