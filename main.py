@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import time
@@ -18,12 +19,39 @@ thread_count = 10
 semaphore = Semaphore(thread_count)
 lock = Lock()
 
+
 # translator = Translator()
+
+def jsonToCsv():
+    print("Converting JSON reports to CSV...")
+    headers = ["Address", "Report Count", "Latest Report", "Total Bitcoin Received", "No. Transactions Received",
+               "Date","Abuse Type","Description"]
+    rows = []
+    for file in os.listdir('reports'):
+        with open(f'reports/{file}', encoding='utf8') as f:
+            data = json.load(f)
+        rows.append(data)
+    with open('Reports.csv', 'w', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        for row in rows:
+            for report in row['reports']:
+                line = []
+                for header in headers[:-3]:
+                    if header in row:
+                        line.append(row[header])
+                    else:
+                        line.append('')
+                line.append(report['Date'])
+                line.append(report['Abuse Type'])
+                line.append(report['Description'])
+                writer.writerow(line)
+    print("Done")
 
 
 def uploadToGoogleDrive():
     gauth = GoogleAuth()
-    gauth.CommandLineAuth()
+    gauth.LocalWebserverAuth()
     drive = GoogleDrive(gauth)
     path = f"{os.getcwd()}/screenshots"
     f = None
@@ -45,6 +73,8 @@ def uploadToGoogleDrive():
             print(f"Unable to upload {x}")
 
 
+jsonToCsv()
+input("Press enter to continue...")
 uploadToGoogleDrive()
 
 
