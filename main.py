@@ -159,6 +159,7 @@ def processPages():
                 next_page = next_page['href']
         except:
             traceback.print_exc()
+        uploadToGoogleDrive()
     with open('report.json', 'w') as f:
         json.dump(report, f, indent=4)
     print("All pages done!! Now Waiting for threads to finish!!")
