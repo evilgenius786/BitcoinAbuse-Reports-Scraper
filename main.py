@@ -13,7 +13,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
-from webdriver_manager.firefox import GeckoDriverManager
+# from webdriver_manager.firefox import GeckoDriverManager
 
 thread_count = 10
 semaphore = Semaphore(thread_count)
@@ -50,9 +50,6 @@ def jsonToCsv():
 
 
 def uploadToGoogleDrive():
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
-    drive = GoogleDrive(gauth)
     path = f"{os.getcwd()}/screenshots"
     f = None
     for x in os.listdir(path):
@@ -73,9 +70,9 @@ def uploadToGoogleDrive():
             print(f"Unable to upload {x}")
 
 
-jsonToCsv()
-input("Press enter to continue...")
-uploadToGoogleDrive()
+# jsonToCsv()
+# input("Press enter to continue...")
+# uploadToGoogleDrive()
 
 
 def getData(addr):
@@ -211,9 +208,13 @@ ________________________________________________________________________________
 
 if __name__ == '__main__':
     try:
+        gauth = GoogleAuth()
+        gauth.LocalWebserverAuth()
+        drive = GoogleDrive(gauth)
         initialize()
         print("Launching Firefox browser...")
-        driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+        driver = webdriver.Firefox(service=Service('./geckodriver'))
+        # driver = webdriver.Firefox()
         main()
     except:
         traceback.print_exc()
