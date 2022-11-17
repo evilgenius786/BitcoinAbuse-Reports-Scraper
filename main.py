@@ -13,11 +13,14 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
+
 # from webdriver_manager.firefox import GeckoDriverManager
 
 thread_count = 10
 semaphore = Semaphore(thread_count)
 lock = Lock()
+# folder_id = "1nZtVT-mQhZCZyz38RPMcqQ574-s3gKXZ"
+folder_id = "1KOntTnQFx2sxPTgo6pBObetnxYfJRvCX"
 
 
 # translator = Translator()
@@ -25,7 +28,7 @@ lock = Lock()
 def jsonToCsv():
     print("Converting JSON reports to CSV...")
     headers = ["Address", "Report Count", "Latest Report", "Total Bitcoin Received", "No. Transactions Received",
-               "Date","Abuse Type","Description"]
+               "Date", "Abuse Type", "Description"]
     rows = []
     for file in os.listdir('reports'):
         with open(f'reports/{file}', encoding='utf8') as f:
@@ -55,7 +58,7 @@ def uploadToGoogleDrive():
     for x in os.listdir(path):
         try:
             print("Uploading", x)
-            f = drive.CreateFile({'title': x})
+            f = drive.CreateFile({'title': x, 'parents': [{'id': folder_id}]})
             f.SetContentFile(os.path.join(path, x))
             f.Upload()
             # Due to a known bug in pydrive if we don't empty the variable used to  upload the files to Google Drive the
@@ -69,10 +72,6 @@ def uploadToGoogleDrive():
             traceback.print_exc()
             print(f"Unable to upload {x}")
 
-
-# jsonToCsv()
-# input("Press enter to continue...")
-# uploadToGoogleDrive()
 
 
 def getData(addr):
@@ -140,7 +139,7 @@ def takeScreenshot(file_name):
     driver.execute_script("window.scrollBy(0,370)", "")
     # driver.save_full_page_screenshot(file_name)
     try:
-        with mss.mss() as sct:
+        with mss() as sct:
             sct.shot(mon=-1, output=file_name)
             sct.close()
     except:
@@ -223,6 +222,8 @@ if __name__ == '__main__':
         gauth = GoogleAuth()
         gauth.LocalWebserverAuth()
         drive = GoogleDrive(gauth)
+        # uploadToGoogleDrive()
+        # input("Done")
         initialize()
         print("Launching Firefox browser...")
         driver = webdriver.Firefox(service=Service('./geckodriver'))
