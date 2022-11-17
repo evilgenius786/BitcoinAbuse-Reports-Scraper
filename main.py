@@ -134,7 +134,13 @@ def getData(addr):
 def takeScreenshot(file_name):
     driver.execute_script("window.scrollBy(0,370)", "")
     # driver.save_full_page_screenshot(file_name)
-    mss().shot(mon=-1, output=file_name)
+    try:
+        with mss.mss() as sct:
+            sct.shot(mon=-1, output=file_name)
+            sct.close()
+    except:
+        print("Unable to take screenshot")
+        traceback.print_exc()
 
 
 def processPages():
