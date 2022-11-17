@@ -76,59 +76,64 @@ def uploadToGoogleDrive():
 
 
 def getData(addr):
-    file = f'./reports/{addr}.json'
-    if os.path.exists(file):
-        print(f'File {file} already exists')
-        return
-    with semaphore:
-        url = f"https://www.bitcoinabuse.com/reports/{addr}"
-        print(url)
-        with lock:
-            driver.get(url)
-            while "server error" in driver.page_source.lower():
-                print("Server error, retrying")
+    try:
+        file = f'./reports/{addr}.json'
+        if os.path.exists(file):
+            print(f'File {file} already exists')
+            return
+        with semaphore:
+            url = f"https://www.bitcoinabuse.com/reports/{addr}"
+            print(url)
+            with lock:
                 driver.get(url)
-                time.sleep(1)
-            try:
-                driver.maximize_window()
-            except:
-                pass
-            time.sleep(1)
-            takeScreenshot(f'./screenshots/{addr}.png')
-            soup = BeautifulSoup(driver.page_source, 'lxml')
-        data = {}
-        page_count = soup.find_all('a', {'class': 'page-link'})
-        if page_count:
-            print(f"Page count ({addr}): ", page_count[-2].text)
-        for tr in soup.find('table', {"id": 'summary-table'}).find_all('tr'):
-            data[tr.find('th').text] = tr.find('td').text
-        data['Address'] = addr
-        reports = soup.find('table', {'class': 'table table-striped table-bordered table-responsive-lg'})
-        ths = reports.find().find_all('th')
-        data['reports'] = []
-        next_page = True
-        while next_page:
-            for tr in reports.find_all('tr'):
-                tds = tr.find_all('td')
+                while "server error" in driver.page_source.lower():
+                    print("Server error, retrying")
+                    driver.get(url)
+                    time.sleep(1)
                 try:
-                    # report = {ths[i].text: translator.translate(tds[i].text).text for i in range(len(tds))}
-                    # json.dumps(report, indent=4)
-                    report = {ths[i].text: tds[i].text for i in range(len(tds))}
+                    driver.maximize_window()
                 except:
-                    print("Unable to translate")
-                    traceback.print_exc()
-                    report = {ths[i].text: tds[i].text for i in range(len(tds))}
-                if report != {}:
-                    data['reports'].append(report)
-            next_page = soup.find('a', {'rel': 'next'})
-            if next_page:
-                soup = getSoup(next_page['href'])
-                print(next_page['href'])
-                reports = soup.find('table', {'class': 'table table-striped table-bordered table-responsive-lg'})
-        print(json.dumps(data, indent=4))
-        with open(file, 'w') as f:
-            json.dump(data, f, indent=4)
-        return data
+                    pass
+                time.sleep(1)
+                takeScreenshot(f'./screenshots/{addr}.png')
+                soup = BeautifulSoup(driver.page_source, 'lxml')
+            data = {}
+            page_count = soup.find_all('a', {'class': 'page-link'})
+            if page_count:
+                print(f"Page count ({addr}): ", page_count[-2].text)
+            for tr in soup.find('table', {"id": 'summary-table'}).find_all('tr'):
+                data[tr.find('th').text] = tr.find('td').text
+            data['Address'] = addr
+            reports = soup.find('table', {'class': 'table table-striped table-bordered table-responsive-lg'})
+            ths = reports.find().find_all('th')
+            data['reports'] = []
+            next_page = True
+            while next_page:
+                for tr in reports.find_all('tr'):
+                    tds = tr.find_all('td')
+                    try:
+                        # report = {ths[i].text: translator.translate(tds[i].text).text for i in range(len(tds))}
+                        # json.dumps(report, indent=4)
+                        report = {ths[i].text: tds[i].text for i in range(len(tds))}
+                    except:
+                        print("Unable to translate")
+                        traceback.print_exc()
+                        report = {ths[i].text: tds[i].text for i in range(len(tds))}
+                    if report != {}:
+                        data['reports'].append(report)
+                next_page = soup.find('a', {'rel': 'next'})
+                if next_page:
+                    soup = getSoup(next_page['href'])
+                    print(next_page['href'])
+                    reports = soup.find('table', {'class': 'table table-striped table-bordered table-responsive-lg'})
+            print(json.dumps(data, indent=4))
+            with open(file, 'w') as f:
+                json.dump(data, f, indent=4)
+            return data
+    except:
+        traceback.print_exc()
+        print("Unable to get data")
+        return None
 
 
 def takeScreenshot(file_name):
