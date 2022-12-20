@@ -73,7 +73,6 @@ def uploadToGoogleDrive():
             print(f"Unable to upload {x}")
 
 
-
 def getData(addr):
     try:
         file = f'./reports/{addr}.json'
@@ -157,8 +156,9 @@ def processPages():
             soup = getSoup(next_page)
             for div in soup.find_all('div', {'class': 'col-xl-4 col-md-6 mb-3'}):
                 addr = div.find('a').text
-                threads.append(Thread(target=getData, args=(addr,)))
-                threads[-1].start()
+                # threads.append(Thread(target=getData, args=(addr,)))
+                # threads[-1].start()
+                getData(addr)
                 if addr not in report:
                     report[addr] = 0
                 report[addr] += 1
